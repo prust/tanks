@@ -1,16 +1,28 @@
 var WIDTH = 1100;
 var HEIGHT = 580;
 // This IP is hardcoded to my server, replace with your own
-var socket = io.connect('https://rubentd-tanks.herokuapp.com');
+var socket = io.connect('http://192.168.1.242:8082');
 var game = new Game('#arena', WIDTH, HEIGHT, socket);
 var selectedTank = 1;
 var tankName = '';
+var last_sec = (new Date()).getSeconds();
+var num_syncs_per_sec = 0;
 
 socket.on('addTank', function(tank){
 	game.addTank(tank.id, tank.type, tank.isLocal, tank.x, tank.y);
 });
 
 socket.on('sync', function(gameServerData){
+	var sec = (new Date()).getSeconds();
+	if (sec != last_sec) {
+	  console.log('# syncs/sec: ' + num_syncs_per_sec);
+	  last_sec = sec;
+	  num_syncs_per_sec = 1;
+	}
+	else {
+	  num_syncs_per_sec++;
+	}
+
 	game.receiveData(gameServerData);
 });
 

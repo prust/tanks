@@ -117,6 +117,14 @@ GameServer.prototype = {
 var game = new GameServer();
 
 /* Connection events */
+setInterval(function() {
+  io.emit('sync', game.getData());
+
+ //I do the cleanup after sending data, so the clients know
+ //when the tank dies and when the balls explode
+  game.cleanDeadTanks();
+  game.cleanDeadBalls();
+}, 50);
 
 io.on('connection', function(client) {
 	console.log('User connected');
@@ -138,14 +146,7 @@ io.on('connection', function(client) {
 		}
 		//update ball positions
 		game.syncBalls();
-		//Broadcast data to clients
-		client.emit('sync', game.getData());
-		client.broadcast.emit('sync', game.getData());
 
-		//I do the cleanup after sending data, so the clients know
-		//when the tank dies and when the balls explode
-		game.cleanDeadTanks();
-		game.cleanDeadBalls();
 		counter ++;
 	});
 
